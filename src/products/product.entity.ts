@@ -11,4 +11,12 @@ export class Product{
   desc: string;
   @Column()
   price: number;
+  @Column()
+  updatedBy: string;
+  @Column()
+  updatedAt: Date;
+  @Column()
+  createdBy: string;
+  @Column()
+  createdAt: Date;
 }

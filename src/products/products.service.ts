@@ -4,6 +4,7 @@ import { Product} from './product.entity'
 import { ProductController } from "./product.controller";
 import { MongoRepository , createConnection,getConnection} from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import jwt_decode from "jwt-decode";
 
 
 
@@ -15,20 +16,35 @@ export class ProductService{
       ) {}
     // private products: Product[] = []
 
-    async insertProduct(title: string , desc: string , price: number){
-        const newProduct = new Product
-        newProduct.title = title
-        newProduct.desc = desc
-        newProduct.price = price
+    // async insertProduct(title: string , desc: string , price: number){
+    //     const newProduct = new Product
+    //     newProduct.title = title
+    //     newProduct.desc = desc
+    //     newProduct.price = price
 
 
-        await this.userRepository.save(newProduct)
+    //     await this.userRepository.save(newProduct)
+    // }
+
+
+    async insertProduct(prod: any ){
+        const header = prod.headers.authorization
+        const head_split = header.substr(7,header.length-7)
+        const decoded = jwt_decode(head_split);
+        prod.body.createdBy = decoded.sub
+        prod.body.createdAt = new Date()
+        console.log(prod.body);
+        await this.userRepository.save(prod.body)
+        
+
     }
+
+   
 
     
 
      async getProducts(){
-        return  this.userRepository.find();
+     return await this.userRepository.find();
         
         
     }
@@ -42,19 +58,31 @@ export class ProductService{
         // return {...product}
     }
 
-    async updateProduct(productId:string, title:string, desc:string, price:number){
+    async updateProduct(productId:string, updProd){
         const updateProduct =await this.userRepository.findOne(productId);
+      
+        const header = updProd.headers.authorization
+        const head_split = header.substr(7,header.length-7)
+        const decoded = jwt_decode(head_split);
+
+        console.log("updateProduct",updateProduct);
+        console.log("update body", updProd.body);
+        
+        
+        updateProduct.updatedBy=decoded.sub
+        updateProduct.updatedAt=new Date()
+        if(updProd.body.title){
+            updateProduct.title=updProd.body.title
+        }
+        if(updProd.body.desc){
+            updateProduct.desc = updProd.body.desc
+        }
+        if(updProd.body.price){
+            updateProduct.price=updProd.body.price
+        }
+        
         console.log(updateProduct);
         
-        if(title){
-            updateProduct.title=title
-        }
-        if(desc){
-            updateProduct.desc = desc
-        }
-        if(price){
-            updateProduct.price=price
-        } 
         await this.userRepository.save(updateProduct)
         
         

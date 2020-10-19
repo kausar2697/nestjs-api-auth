@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { MongoRepository} from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import {Auth} from '../users/user.entity'
+import jwt_decode from "jwt-decode";
 
 
 @Injectable()
@@ -45,8 +46,7 @@ export class AuthService {
         if(user[0].username!="")
           payobj.username = user[0].username;
     }
-    console.log(payobj);
-    const result = {
+    return {
       access_token: this.jwtService.sign(payobj),
       
     };
